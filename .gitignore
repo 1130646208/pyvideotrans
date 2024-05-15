@@ -3,6 +3,7 @@
 .git
 .github
 .idea
+.vscode
 tmp
 models/*.pt
 models/models--Systran--faster-whisper-base
