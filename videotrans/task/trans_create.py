@@ -46,7 +46,7 @@ class TransCreate():
 
     '''
 
-    def __init__(self, config_params: dict = None, obj=None):
+    def __init__(self, config_params: dict=None, obj=None):
         # 视频原始路径 名称等信息
         self.obj = obj
         # 配置信息
@@ -239,7 +239,6 @@ class TransCreate():
                 elif self.obj['output']!=self.obj['linshi_output']:
                     config.logger.info(f'使用已放置到目标文件夹下的目标语言字幕:{raw_target_srt}')
                     shutil.copy2(raw_target_srt,self.init['target_sub'])
-
 
 
     # 启动执行入口

@@ -12,14 +12,13 @@ import os
 import re
 import sys
 import traceback
-from videotrans.box.worker import Worker
 from videotrans.configure import config
 import argparse
 from videotrans.task.trans_create import TransCreate
-from videotrans.translator import LANG_CODE, is_allow_translate, BAIDU_NAME, TENCENT_NAME, CHATGPT_NAME, AZUREGPT_NAME, \
+from videotrans.translator import LANG_CODE, BAIDU_NAME, TENCENT_NAME, CHATGPT_NAME, AZUREGPT_NAME, \
     GEMINI_NAME, DEEPLX_NAME, DEEPL_NAME
 from videotrans.util import tools
-from videotrans.util.tools import send_notification, set_process, set_proxy, get_edge_rolelist, get_elevenlabs_role
+from videotrans.util.tools import send_notification, set_proxy, get_edge_rolelist, get_elevenlabs_role
 from tqdm import tqdm
 
 def __init__():
@@ -34,25 +33,27 @@ def __init__():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='cli.ini and source mp4')
+    parser = argparse.ArgumentParser(description='###### pyVideoTrans ######')
     parser.add_argument('-c', type=str, help='cli.ini file absolute filepath', default=os.path.join(os.getcwd(), 'cli.ini'))
-    parser.add_argument('-m', type=str, help='mp4 absolute filepath', default="")
+    parser.add_argument('-m', type=str, required=True, help='mp4 absolute filepath', default="")
+    parser.add_argument('-o', type=str, help='output dir, default is a folder in video path, which named the same as video name')
+    parser.add_argument('--subtitle_type', type=int, help='subtitle type, 0: nothing, 1: hard embeded, 2: soft embeded', default=2)
     parser.add_argument('-cuda', action='store_true', help='Activates the cuda option')
-
+    
     args = vars(parser.parse_args())
 
     config.settings['countdown_sec'] = 0
+    # 检查配置文件是否存在
     cfg_file = args['c']
     if not os.path.exists(cfg_file):
         print('不存在配置文件 cli.ini' if config.defaulelang == 'zh' else "cli.ini file not exists")
         sys.exit()
-
+    # 读取配置文件
     with open(cfg_file, 'r', encoding="utf-8") as f:
         for line in f.readlines():
             line = line.strip()
             if not line or line.startswith(";"):
                 continue
-
             line = [x.strip() for x in line.split("=", maxsplit=1)]
             if len(line) != 2:
                 continue
@@ -68,23 +69,34 @@ if __name__ == '__main__':
         config.params['target_language']='-'
     if not config.params.get('back_audio'):
         config.params['back_audio']='-'
+
+    # 处理其它参数
     if args['cuda']:
         config.params['cuda'] = True
     if args['m'] and os.path.exists(args['m']):
-        config.params['source_mp4'] = args['m']
-
-    # 传多个视频的话,考虑支持批量处理
-    if type(args['m']) == str:
-        config.params['is_batch'] = False
-    else:
-        config.params['is_batch'] = True
-        print("命令行批量处理暂未支持")
-        sys.exit()
-
+        # 传多个视频的话,考虑支持批量处理
+        if type(args['m']) == str:
+            config.params['is_batch'] = False
+        else:
+            config.params['is_batch'] = True
+            print("命令行批量处理暂未支持")
+            sys.exit()
+    config.params['source_mp4'] = os.path.abspath(args['m'])
     if not config.params['source_mp4'] or not os.path.exists(config.params['source_mp4']):
         print(
-            "必须在命令行或cli.ini文件设置 source_mp4(视频文件)的绝对路径" if config.defaulelang == 'zh' else "The absolute path of source_mp4 (video file) must be set on the command line or in the cli.ini file.")
+            "必须在命令行或cli.ini文件设置source_mp4(视频文件)的绝对路径" if config.defaulelang == 'zh' 
+            else "The absolute path of source_mp4 (video file) must be set on the command line "+
+            "or in the cli.ini file.")
         sys.exit()
+    
+    config.params['subtitle_type'] = args.get('subtitle_type')
+
+    (base, ext) = os.path.splitext(config.params['source_mp4'].replace('\\', '/'))
+    if args.get('o'):
+        config.params['target_dir'] = args.get('o')
+    else:
+        config.params['target_dir'] = os.path.dirname(base)
+
     # 字幕嵌入时标记的语言，目标语言
     if config.params['target_language']!='-':
         config.params['subtitle_language'] = LANG_CODE[config.params['target_language']][1]
@@ -146,8 +158,7 @@ if __name__ == '__main__':
         set_proxy(config.proxy)
     config.current_status = 'ing'
     config.params['app_mode'] = 'cli'
-    (base, ext) = os.path.splitext(config.params['source_mp4'].replace('\\', '/'))
-    config.params['target_dir'] = os.path.dirname(base)
+    
     obj_format = tools.format_video(config.params['source_mp4'].replace('\\', '/'), config.params['target_dir'])
     
     process_bar_data = [
@@ -157,8 +168,8 @@ if __name__ == '__main__':
         config.transobj['kaishipeiyin'],
         config.transobj['kaishihebing'],
     ]
-
     process_bar = tqdm(process_bar_data)
+
     try:
         video_task = TransCreate(config.params, obj_format)
         try:
@@ -212,6 +223,6 @@ if __name__ == '__main__':
         send_notification(config.transobj["zhixingwc"], f'"subtitles -> audio"')
         print(f'{"执行完成" if config.defaulelang == "zh" else "Succeed"} {video_task.targetdir_mp4}')
     except Exception as e:
-        send_notification(e, f'{video_task.obj["raw_basename"]}')
+        send_notification(e, config.transobj["anerror"])
         # 捕获异常并重新绑定回溯信息
         traceback.print_exc()
