@@ -35,7 +35,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.initUI()
         self.setWindowIcon(QIcon(f"{config.rootdir}/videotrans/styles/icon.ico"))
         self.setWindowTitle(
-            f"pyVideoTrans{config.uilanglist['Video Toolbox']} {VERSION} pyvideotrans.com {' Q群 905857759 ' if config.defaulelang == 'zh' else ''}")
+            f"pyVideoTrans{config.uilanglist['Video Toolbox']} {VERSION} pyvideotrans.com {' Q群 933714380 ' if config.defaulelang == 'zh' else ''}")
 
     def closeEvent(self, event):
         if config.exit_soft:
@@ -457,7 +457,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         tmpname = f'{config.TEMP_DIR}/{time.time()}.mp4'
         tmpname_conver = f'{config.TEMP_DIR}/box-conver.mp4'
         video_info = tools.get_video_info(videofile)
-        if videofile[-3:].lower() != 'mp4' or video_info['video_codec_name'] != 'h264' or (
+        video_codec= 'h264' if config.settings['video_codec']==264 else 'hevc'
+        if videofile[-3:].lower() != 'mp4' or video_info['video_codec_name'] != video_codec or (
                 video_info['streams_audio'] > 0 and video_info['audio_codec_name'] != 'aac'):
             try:
                 tools.conver_mp4(videofile, tmpname_conver, is_box=True)
@@ -572,7 +573,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if not allow:
                     self.is_cuda.setChecked(False)
                     return QMessageBox.critical(self, config.transobj['anerror'], config.transobj["nocudnn"])
-        if model_type == 'faster':
+        if model_type == 'faster' and model.find('/')==-1:
             file = f'{config.rootdir}/models/models--Systran--faster-whisper-{model}/snapshots'
             if model.startswith('distil'):
                 file = f'{config.rootdir}/models/models--Systran--faster-{model}/snapshots'

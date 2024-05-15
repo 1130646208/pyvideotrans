@@ -7,7 +7,7 @@
 >
 > 语音识别支持 `faster-whisper`模型 `openai-whisper`模型 和 `GoogleSpeech` `zh_recogn阿里中文语音识别模型`.
 >
-> 文字翻译支持 `微软翻译|Google翻译|百度翻译|腾讯翻译|ChatGPT|AzureAI|Gemini|DeepL|DeepLX|离线翻译OTT`,并内置免费ChatGPT API翻译接口(apiskey.top赞助)
+> 文字翻译支持 `微软翻译|Google翻译|百度翻译|腾讯翻译|ChatGPT|AzureAI|Gemini|DeepL|DeepLX|离线翻译OTT`
 >
 > 文字合成语音支持 `Microsoft Edge tts` `Google tts` `Azure AI TTS` `Openai TTS` `Elevenlabs TTS` `自定义TTS服务器api` `GPT-SoVITS` [clone-voice](https://github.com/jianchang512/clone-voice)
 >
@@ -55,6 +55,13 @@ https://github.com/jianchang512/pyvideotrans/assets/3378335/3811217a-26c8-4084-b
 # MacOS源码部署
 
 0. 打开终端窗口，分别执行如下命令
+	
+	> 执行前确保已安装 Homebrew，如果你没有安装 Homebrew,那么需要先安装
+	>
+	> 执行命令安装 Homebrew：  `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+	>
+	> 安装完成后，执行： `eval $(brew --config)`
+	>
 
     ```
     brew install libsndfile
@@ -134,7 +141,7 @@ sudo yum install -y ffmpeg
 
 ```
 
-## Ubuntu/Debian系执行如下命令安装python3.12
+1. Ubuntu/Debian系执行如下命令安装python3.12
 
 ```
 

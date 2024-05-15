@@ -63,6 +63,7 @@ def parse_init():
         "temperature":1,
         "condition_on_previous_text":False,
         "crf":13,
+        "video_codec":264,
         "retries":2,
         "chatgpt_model":"gpt-3.5-turbo,gpt-4,gpt-4-turbo-preview,qwen",
         "separate_sec":600,
@@ -71,6 +72,8 @@ def parse_init():
         "initial_prompt_zh":"",
         "fontsize":16,
         "fontname":"黑体",
+        "fontcolor":"&HFFFFFF",
+        "fontbordercolor":"&H000000",
         "subtitle_bottom":0,
         "voice_silence":200,
         "interval_split":6,
@@ -93,6 +96,7 @@ def parse_init():
             with file.open('r', encoding="utf-8") as f:
                 # 遍历.ini文件中的每个section
                 for it in f.readlines():
+                    
                     it = it.strip()
                     if not it or it.startswith(';'):
                         continue
@@ -125,6 +129,8 @@ except Exception:
 
 # 初始化一个字典变量
 settings = parse_init()
+
+
 # default language 如果 ini中设置了，则直接使用，否则自动判断
 if settings['lang']:
     defaulelang = settings['lang'].lower()
@@ -163,23 +169,12 @@ queue_logs = Queue(1000)
 # box窗口
 queuebox_logs = Queue(1000)
 
-model_list=[
-    "tiny",
-    "tiny.en",
-    "base",
-    "base.en",
-    "small",
-    "small.en",
-    "medium",
-    "medium.en",
-    "large-v1",
-    "large-v2",
-    "large-v3",
-    "distil-whisper-small.en",
-    "distil-whisper-medium.en",
-    "distil-whisper-large-v2",
-    "distil-whisper-large-v3"
-    ]
+
+
+
+model_list=settings['model_list'].split(',')
+
+
 
 # 开始按钮状态
 current_status = "stop"
